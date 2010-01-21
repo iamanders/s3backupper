@@ -42,7 +42,7 @@ class uploader:
 if __name__ == '__main__':
 	
 	access_key = 'PUT YOUR AMAZON ACCESS KEY HERE!'
-	secret_key = 'PUT YOUR AMAZON SECREAT KEY HERE!'
+	secret_key = 'PUT YOUR AMAZON SECRET KEY HERE!'
 	uploader = uploader(access_key, secret_key)
 
 	#To backup
