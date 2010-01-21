@@ -1,0 +1,2 @@
+Python script for zipping and backing up files to Amazon S3 service
+Requires the boto libraries to work. http://code.google.com/p/boto/
