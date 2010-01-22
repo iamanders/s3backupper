@@ -61,8 +61,8 @@ if __name__ == '__main__':
 
 	#To backup
 	to_backup = [
-					{ 'id': 'foo', 'path': '/path/to/files1/', 'bucket': 'bucket1', 'date': True },
-					#{ 'id': 'bar', 'path': '/path/to/files2/', 'bucket': 'bucket2', 'date': False },
+					{ 'id': 'foo', 'path': '/path/to/files1/', 'bucket': 'bucket1', 'date': True, 'crypt': True },
+					#{ 'id': 'bar', 'path': '/path/to/files2/', 'bucket': 'bucket2', 'date': False, 'Crypt': False },
 				]
 	
 	print ''
