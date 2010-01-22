@@ -11,12 +11,14 @@ from boto.s3.key import Key
 class uploader:
 	"""Class for gzip and upload files to Amazon S3"""
 	
-	def __init__(self, access_key, secret_key):
+	def __init__(self, access_key, secret_key, crypt_key):
 		self.access_key = access_key
 		self.secret_key = secret_key
+		self.crypt_key = crypt_key
 		self.s3connection = S3Connection(access_key, secret_key)
-	
-	def the_magic(self, id, path_to_bup, bucketname, date_in_filename):
+
+
+	def the_magic(self, id, path_to_bup, bucketname, date_in_filename, crypt):
 		file_contents = os.listdir(path_to_bup)
 		if date_in_filename:
 			s3_filename = "%s_%s.tar.gz" % (id, time.strftime("%Y-%m-%d-%H%M%S"))
@@ -31,24 +33,36 @@ class uploader:
 			tar.add(path_to_bup + f)
 		tar.close()
 	
+		#crypt the file?
+		if crypt:
+			os.system("gpg -c --passphrase '%s' --yes /tmp/backup.tar.gz" % self.crypt_key)
+			temp_filename += '.gpg'
+			s3_filename += '.gpg'
+	
 		#upload
 		bucket = self.s3connection.get_bucket(bucketname)
 		s3key = Key(bucket)
 		s3key.key = s3_filename
 		s3key.set_contents_from_filename(temp_filename)
+		
+		#clean the tmp folder
+		os.remove('/tmp/backup.tar.gz')
+		if crypt:
+			os.remove('/tmp/backup.tar.gz.gpg')
 
 
 
 if __name__ == '__main__':
 	
-	access_key = 'PUT YOUR AMAZON ACCESS KEY HERE!'
-	secret_key = 'PUT YOUR AMAZON SECRET KEY HERE!'
-	uploader = uploader(access_key, secret_key)
+	access_key = 'PUT YOUR AMAZON ACCESS KEY HERE'
+	secret_key = 'PUT YOUR AMAZON SECRET KEY HERE'
+	crypt_key = 'PUT-A-SECRET-CRYPT-CODE-HERE'
+	uploader = uploader(access_key, secret_key, crypt_key)
 
 	#To backup
 	to_backup = [
-					{'id': 'foo', 'path': '/path/to/files1/', 'bucket': 'bucket1', 'date': False},
-					#{'id': 'bar', 'path': '/path/to/files2/', 'bucket': 'bucket2', 'date': True},
+					{ 'id': 'foo', 'path': '/path/to/files1/', 'bucket': 'bucket1', 'date': True },
+					#{ 'id': 'bar', 'path': '/path/to/files2/', 'bucket': 'bucket2', 'date': False },
 				]
 	
 	print ''
@@ -57,7 +71,7 @@ if __name__ == '__main__':
 	for b in to_backup:
 		print '%s - start backup %s' % (time.strftime("%Y-%m-%d %H:%M:%S"), b['id'])
 		try:
-			uploader.the_magic(b['id'], b['path'], b['bucket'], b['date'])
+			uploader.the_magic(b['id'], b['path'], b['bucket'], b['date'], b['crypt'])
 		except:
 			print '%s - FAIL %s' % (time.strftime("%Y-%m-%d %H:%M:%S"), b['id'])
 			
